@@ -234,9 +234,10 @@ class BydAcTemperatureNumber(BydVehicleEntity, NumberEntity):
         """Set and persist the default A/C temperature for this vehicle."""
         value = max(AC_TEMP_MIN, min(AC_TEMP_MAX, float(value)))
 
-        temps = dict(self._entry.options.get(CONF_AC_TEMPERATURE, {}))
-        if not isinstance(temps, dict):
-            temps = {}
+        # Older versions stored a bare float here instead of a per-VIN dict,
+        # so only build on top of the value when it really is a mapping.
+        raw = self._entry.options.get(CONF_AC_TEMPERATURE, {})
+        temps = dict(raw) if isinstance(raw, dict) else {}
         temps[self._vin] = value
 
         options = {**self._entry.options, CONF_AC_TEMPERATURE: temps}

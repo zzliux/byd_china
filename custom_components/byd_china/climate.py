@@ -412,12 +412,14 @@ class BydClimate(BydVehicleEntity, ClimateEntity):
         else:
             value = temps
         try:
-            temp = float(value)
+            temp: float | None = float(value)
         except (TypeError, ValueError):
+            temp = None
+        # target_temperature is None while the A/C is off, so guard against
+        # comparing None with floats before falling back to the default.
+        if temp is None or not (BYD_TEMP_MIN <= temp <= BYD_TEMP_MAX):
             temp = self.target_temperature
-        if not (BYD_TEMP_MIN <= temp <= BYD_TEMP_MAX):
-            temp = self.target_temperature
-        if not (BYD_TEMP_MIN <= temp <= BYD_TEMP_MAX):
+        if temp is None or not (BYD_TEMP_MIN <= temp <= BYD_TEMP_MAX):
             temp = DEFAULT_AC_TEMPERATURE
         return temp
 
